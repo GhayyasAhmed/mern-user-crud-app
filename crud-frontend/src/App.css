@@ -56,6 +56,10 @@ body {
   width: min(100%, 420px);
 }
 
+.lazy-loader {
+  font-size: 1rem;
+}
+
 @media (max-width: 576px) {
   .app-shell {
     padding: 16px 12px;
