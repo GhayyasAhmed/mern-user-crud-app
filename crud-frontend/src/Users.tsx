@@ -1,53 +1,63 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { api, getErrorMessage } from "./api";
+import type { UserType } from "./types";
 
 function Users() {
     const [users, setUsers] = useState<UserType[]>([]);
-    interface UserType {
-        id: string;
-        name: string;
-        email: string;  
-        age: number;
-    }
-
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        axios.get('http://localhost:3001/api/users')
-        .then((res) => {
-            setUsers(res.data.data as UserType[]);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
+        const fetchUsers = async () => {
+            try {
+                setIsLoading(true);
+                setError("");
+                const response = await api.get("/users");
+                setUsers(response.data.data as UserType[]);
+            } catch (err) {
+                setError(getErrorMessage(err, "Unable to load users right now."));
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        void fetchUsers();
     }, []);
 
     const updateUser = (id: string) => {
         navigate(`/update/${id}`);
-    }
+    };
 
-    const handleDeleteUser = (id: string) => {
-        console.log(id);
-
-        axios.delete(`http://localhost:3001/api/users/${id}`)
-            .then((res) => {
-                console.log(res)
-                console.log(res.data);
-                const updatedUsers = users.filter(user => user.id !== id);
-                setUsers(updatedUsers)
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-        // navigate(`/delete/${id}`);
-    }
+    const handleDeleteUser = async (id: string) => {
+        try {
+            setDeletingUserId(id);
+            setError("");
+            await api.delete(`/users/${id}`);
+            setUsers((currentUsers) => currentUsers.filter((user) => user.id !== id));
+        } catch (err) {
+            setError(getErrorMessage(err, "Unable to delete the user."));
+        } finally {
+            setDeletingUserId(null);
+        }
+    };
 
     const navigate = useNavigate();
 
   return (
-    <div className="d-flex justify-content-center align-items-center bg-primary vh-100">
-        <div className="w-50 border bg-white rounded p-3">
-            <Link to="/create" className="btn btn-success float-end">Add User</Link>
+    <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="w-50 border bg-white rounded p-3 shadow-sm">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h3 className="mb-0">Users</h3>
+                <Link to="/create" className="btn btn-success">Add User</Link>
+            </div>
+            {error ? <div className="alert alert-danger">{error}</div> : null}
+            {isLoading ? <div className="alert alert-info">Loading users...</div> : null}
+            {!isLoading && users.length === 0 ? (
+                <div className="alert alert-secondary mb-0">No users found yet.</div>
+            ) : null}
+            {!isLoading && users.length > 0 ? (
             <table className="table">
                 <thead>
                     <tr>
@@ -66,16 +76,23 @@ function Users() {
                                 <td>{user.age}</td>
                                 <td>
                                     <button className="btn btn-primary" onClick={() => updateUser(user.id)}>Update</button>
-                                    <button className="btn btn-danger ms-2" onClick={() => handleDeleteUser(user.id)}>Delete</button>
+                                    <button
+                                        className="btn btn-danger ms-2"
+                                        onClick={() => handleDeleteUser(user.id)}
+                                        disabled={deletingUserId === user.id}
+                                    >
+                                        {deletingUserId === user.id ? "Deleting..." : "Delete"}
+                                    </button>
                                 </td>
                             </tr>
                         ))
                     }
                 </tbody>
             </table>
+            ) : null}
         </div>
     </div>
-  )
+  );
 }
 
-export default Users
+export default Users;
