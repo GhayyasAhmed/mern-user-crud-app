@@ -36,8 +36,8 @@ function validateUserPayload(req: Request) {
 
   if (typeof age !== "number" || Number.isNaN(age)) {
     errors.push("Age must be a number.");
-  } else if (!Number.isInteger(age) || age < 13 || age > 120) {
-    errors.push("Age must be a whole number between 13 and 120.");
+  } else if (!Number.isInteger(age) || age < 1 || age > 120) {
+    errors.push("Age must be a whole number between 1 and 120.");
   }
 
   return errors;

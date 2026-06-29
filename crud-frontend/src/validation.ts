@@ -22,6 +22,10 @@ export function getUserFormErrors(values: UserFormValues): UserFormFieldErrors {
     errors.name = "Name must be at least 2 characters long.";
   }
 
+  if (trimmedName && trimmedName.length > 50) {
+    errors.name = "Name must be less than 50 characters.";
+  }
+
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!trimmedEmail) {
     errors.email = "Email is required.";
@@ -34,7 +38,6 @@ export function getUserFormErrors(values: UserFormValues): UserFormFieldErrors {
   } else if (!Number.isInteger(age) || age < 1 || age > 120) {
     errors.age = "Age must be a whole number between 1 and 120.";
   }
-
   return errors;
 }
 

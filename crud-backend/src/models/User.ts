@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
     age: {
       type: Number,
       required: true,
-      min: 13,
+      min: 1,
       max: 120,
     },
   },
@@ -32,8 +32,6 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
-userSchema.index({ email: 1 }, { unique: true });
 
 const User = mongoose.model("User", userSchema);
 
