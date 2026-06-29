@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api, getErrorMessage } from "./api";
+import { api, fetchUsers as fetchUsersFromApi, getErrorMessage } from "./api";
 import { getFlashMessage } from "./notifications";
 import type { UserType } from "./types";
 
@@ -20,8 +20,7 @@ function Users() {
     try {
       setIsLoading(true);
       setError("");
-      const response = await api.get("/users");
-      setUsers(response.data.data as UserType[]);
+      setUsers(await fetchUsersFromApi());
     } catch (err) {
       setError(getErrorMessage(err, "Unable to load users right now."));
     } finally {

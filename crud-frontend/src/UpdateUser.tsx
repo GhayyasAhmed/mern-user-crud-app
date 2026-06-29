@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { api, getErrorMessage } from "./api";
+import { api, fetchUserById, getErrorMessage } from "./api";
 import UserForm from "./components/UserForm";
 import { setFlashMessage } from "./notifications";
 import { getUserFormErrors } from "./validation";
@@ -36,8 +36,7 @@ function UpdateUser() {
         setIsLoading(true);
         setErrors({});
         setIsMissing(false);
-        const response = await api.get(`/users/${id}`);
-        const user = response.data.data;
+        const user = await fetchUserById(id);
         setValues({
           name: user.name ?? "",
           email: user.email ?? "",
