@@ -7,3 +7,30 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.app-shell {
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+.app-panel {
+  width: min(100%, 920px);
+}
+
+.form-panel {
+  width: min(100%, 680px);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+  .app-shell {
+    padding: 16px 12px;
+  }
+}

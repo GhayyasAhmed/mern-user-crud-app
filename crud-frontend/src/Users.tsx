@@ -31,6 +31,12 @@ function Users() {
     };
 
     const handleDeleteUser = async (id: string) => {
+        const isConfirmed = window.confirm("Delete this user permanently?");
+
+        if (!isConfirmed) {
+            return;
+        }
+
         try {
             setDeletingUserId(id);
             setError("");
@@ -46,8 +52,8 @@ function Users() {
     const navigate = useNavigate();
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="w-50 border bg-white rounded p-3 shadow-sm">
+    <div className="app-shell d-flex justify-content-center align-items-center">
+        <div className="app-panel border bg-white rounded p-3 shadow-sm">
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h3 className="mb-0">Users</h3>
                 <Link to="/create" className="btn btn-success">Add User</Link>
@@ -58,7 +64,8 @@ function Users() {
                 <div className="alert alert-secondary mb-0">No users found yet.</div>
             ) : null}
             {!isLoading && users.length > 0 ? (
-            <table className="table">
+            <div className="table-wrap">
+            <table className="table align-middle">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -74,7 +81,7 @@ function Users() {
                                 <td>{user.name}</td>
                                 <td>{user.email}</td>
                                 <td>{user.age}</td>
-                                <td>
+                                <td className="actions-cell">
                                     <button className="btn btn-primary" onClick={() => updateUser(user.id)}>Update</button>
                                     <button
                                         className="btn btn-danger ms-2"
@@ -89,6 +96,7 @@ function Users() {
                     }
                 </tbody>
             </table>
+            </div>
             ) : null}
         </div>
     </div>

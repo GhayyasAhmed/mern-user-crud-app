@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, getErrorMessage } from "./api";
+import { validateUserForm } from "./validation";
 
 function CreateUser() {
     const [name, setName] = useState("");
@@ -14,8 +15,14 @@ function CreateUser() {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (!name.trim() || !email.trim() || !age.trim()) {
-            setError("Name, email, and age are required.");
+        const validationError = validateUserForm({
+            name,
+            email,
+            age: Number(age),
+        });
+
+        if (validationError) {
+            setError(validationError);
             return;
         }
 
@@ -36,8 +43,8 @@ function CreateUser() {
     };
 
     return (
-        <div className="d-flex justify-content-center align-items-center bg-primary vh-100">
-            <div className="w-50 border bg-white rounded p-3 shadow-sm">
+        <div className="app-shell d-flex justify-content-center align-items-center">
+            <div className="form-panel border bg-white rounded p-3 shadow-sm">
                 <h3>Create User</h3>
                 <form onSubmit={handleSubmit}>
                     {error ? <div className="alert alert-danger">{error}</div> : null}

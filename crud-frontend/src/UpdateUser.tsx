@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, getErrorMessage } from "./api";
 import type { UserType } from "./types";
+import { validateUserForm } from "./validation";
 
 function UpdateUser() {
     const { id } = useParams();
@@ -26,6 +27,7 @@ function UpdateUser() {
                 const response = await api.get(`/users/${id}`);
                 setUser(response.data.data as UserType);
             } catch (err) {
+                
                 setError(getErrorMessage(err, "Unable to load the user."));
             } finally {
                 setIsLoading(false);
@@ -43,6 +45,12 @@ function UpdateUser() {
             return;
         }
 
+        const validationError = validateUserForm(user);
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
+
         try {
             setIsSubmitting(true);
             setError("");
@@ -56,8 +64,8 @@ function UpdateUser() {
     };
 
     return (
-        <div className="d-flex justify-content-center align-items-center bg-primary vh-100">
-            <div className="w-50 border bg-white rounded p-3 shadow-sm">
+        <div className="app-shell d-flex justify-content-center align-items-center">
+            <div className="form-panel border bg-white rounded p-3 shadow-sm">
                 <h3>Update User</h3>
                 {error ? <div className="alert alert-danger">{error}</div> : null}
                 {isLoading ? <div className="alert alert-info">Loading user...</div> : null}
