@@ -1,119 +1,140 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api, getErrorMessage } from "./api";
-import type { UserType } from "./types";
-import { validateUserForm } from "./validation";
+import UserForm from "./components/UserForm";
+import { setFlashMessage } from "./notifications";
+import { getUserFormErrors } from "./validation";
 
 function UpdateUser() {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [user, setUser] = useState<UserType | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState("");
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [values, setValues] = useState({
+    name: "",
+    email: "",
+    age: "",
+  });
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    age?: string;
+    form?: string;
+  }>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMissing, setIsMissing] = useState(false);
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            if (!id) {
-                setError("User ID is missing.");
-                setIsLoading(false);
-                return;
-            }
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!id) {
+        setErrors({ form: "User ID is missing." });
+        setIsLoading(false);
+        return;
+      }
 
-            try {
-                setIsLoading(true);
-                setError("");
-                const response = await api.get(`/users/${id}`);
-                setUser(response.data.data as UserType);
-            } catch (err) {
-                
-                setError(getErrorMessage(err, "Unable to load the user."));
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        void fetchUser();
-    }, [id]);
-
-    const handleUpdate = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        if (!id || !user) {
-            setError("User details are not ready yet.");
-            return;
-        }
-
-        const validationError = validateUserForm(user);
-        if (validationError) {
-            setError(validationError);
-            return;
-        }
-
-        try {
-            setIsSubmitting(true);
-            setError("");
-            await api.patch(`/users/${id}`, user);
-            navigate("/");
-        } catch (err) {
-            setError(getErrorMessage(err, "Unable to update the user."));
-        } finally {
-            setIsSubmitting(false);
-        }
+      try {
+        setIsLoading(true);
+        setErrors({});
+        setIsMissing(false);
+        const response = await api.get(`/users/${id}`);
+        const user = response.data.data;
+        setValues({
+          name: user.name ?? "",
+          email: user.email ?? "",
+          age: String(user.age ?? ""),
+        });
+      } catch (error) {
+        const message = getErrorMessage(error, "Unable to load the user.");
+        setErrors({ form: message });
+        setIsMissing(message.toLowerCase().includes("not found"));
+      } finally {
+        setIsLoading(false);
+      }
     };
 
+    void fetchUser();
+  }, [id]);
+
+  const handleChange = (field: "name" | "email" | "age", value: string) => {
+    setValues((currentValues) => ({
+      ...currentValues,
+      [field]: value,
+    }));
+
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      [field]: undefined,
+      form: undefined,
+    }));
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!id) {
+      setErrors({ form: "User ID is missing." });
+      return;
+    }
+
+    const fieldErrors = getUserFormErrors({
+      ...values,
+      age: Number(values.age),
+    });
+
+    if (fieldErrors.name || fieldErrors.email || fieldErrors.age) {
+      setErrors(fieldErrors);
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrors({});
+      await api.patch(`/users/${id}`, {
+        name: values.name.trim(),
+        email: values.email.trim(),
+        age: Number(values.age),
+      });
+      setFlashMessage({
+        text: "User updated successfully.",
+        type: "success",
+      });
+      navigate("/");
+    } catch (error) {
+      setErrors({
+        form: getErrorMessage(error, "Unable to update the user."),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isMissing && !isLoading) {
     return (
-        <div className="app-shell d-flex justify-content-center align-items-center">
-            <div className="form-panel border bg-white rounded p-3 shadow-sm">
-                <h3>Update User</h3>
-                {error ? <div className="alert alert-danger">{error}</div> : null}
-                {isLoading ? <div className="alert alert-info">Loading user...</div> : null}
-                <form onSubmit={handleUpdate}>
-                    <div className="mb-3">
-                        <label htmlFor="name" className="form-label">Name</label>
-                        <input
-                            type="text"
-                            placeholder="Enter name"
-                            className="form-control"
-                            id="name"
-                            value={user?.name ?? ""}
-                            onChange={(e) => setUser((prev) => (prev ? { ...prev, name: e.target.value } : prev))}
-                            disabled={isLoading || !user || isSubmitting}
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email</label>
-                        <input
-                            type="email"
-                            placeholder="Enter email"
-                            className="form-control"
-                            id="email"
-                            value={user?.email ?? ""}
-                            onChange={(e) => setUser((prev) => (prev ? { ...prev, email: e.target.value } : prev))}
-                            disabled={isLoading || !user || isSubmitting}
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="age" className="form-label">Age</label>
-                        <input
-                            type="number"
-                            placeholder="Enter age"
-                            className="form-control"
-                            id="age"
-                            value={user?.age ?? ""}
-                            onChange={(e) => setUser((prev) => (prev ? { ...prev, age: Number(e.target.value) } : prev))}
-                            disabled={isLoading || !user || isSubmitting}
-                        />
-                    </div>
-                    <button type="submit" className="btn btn-primary" disabled={isLoading || !user || isSubmitting}>
-                        {isSubmitting ? "Updating..." : "Update"}
-                    </button>
-                    <Link to="/" className="btn btn-danger float-end ms-2">Cancel</Link>
-                </form>
-            </div>
+      <div className="app-shell d-flex justify-content-center align-items-center">
+        <div className="form-panel border bg-white rounded p-3 shadow-sm">
+          <div className="alert alert-warning mb-3" role="alert">
+            The requested user could not be found.
+          </div>
+          <button className="btn btn-primary" onClick={() => navigate("/")}>
+            Back to Users
+          </button>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <UserForm
+      title="Update User"
+      values={values}
+      errors={errors}
+      isSubmitting={isSubmitting}
+      isLoading={isLoading}
+      submitLabel="Update"
+      onChange={handleChange}
+      onSubmit={handleSubmit}
+    />
+  );
 }
 
 export default UpdateUser;

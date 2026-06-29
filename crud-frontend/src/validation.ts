@@ -2,27 +2,43 @@ import type { UserType } from "./types";
 
 type UserFormValues = Pick<UserType, "name" | "email" | "age">;
 
-export function validateUserForm(values: UserFormValues): string {
+export interface UserFormFieldErrors {
+  name?: string;
+  email?: string;
+  age?: string;
+}
+
+export function getUserFormErrors(values: UserFormValues): UserFormFieldErrors {
   const trimmedName = values.name.trim();
   const trimmedEmail = values.email.trim();
   const age = Number(values.age);
+  const errors: UserFormFieldErrors = {};
 
-  if (!trimmedName || !trimmedEmail || Number.isNaN(age)) {
-    return "Name, email, and age are required.";
+  if (!trimmedName) {
+    errors.name = "Name is required.";
   }
 
-  if (trimmedName.length < 2) {
-    return "Name must be at least 2 characters long.";
+  if (trimmedName && trimmedName.length < 2) {
+    errors.name = "Name must be at least 2 characters long.";
   }
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(trimmedEmail)) {
-    return "Enter a valid email address.";
+  if (!trimmedEmail) {
+    errors.email = "Email is required.";
+  } else if (!emailPattern.test(trimmedEmail)) {
+    errors.email = "Enter a valid email address.";
   }
 
-  if (!Number.isInteger(age) || age < 1 || age > 120) {
-    return "Age must be a whole number between 1 and 120.";
+  if (Number.isNaN(age)) {
+    errors.age = "Age is required.";
+  } else if (!Number.isInteger(age) || age < 1 || age > 120) {
+    errors.age = "Age must be a whole number between 1 and 120.";
   }
 
-  return "";
+  return errors;
+}
+
+export function validateUserForm(values: UserFormValues): string {
+  const errors = getUserFormErrors(values);
+  return errors.name || errors.email || errors.age || "";
 }
