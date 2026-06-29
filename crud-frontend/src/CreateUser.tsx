@@ -3,7 +3,6 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, getErrorMessage } from "./api";
 import UserForm from "./components/UserForm";
-import { setFlashMessage } from "./notifications";
 import { getUserFormErrors } from "./validation";
 
 function CreateUser() {
@@ -54,10 +53,6 @@ function CreateUser() {
         name: values.name.trim(),
         email: values.email.trim(),
         age: Number(values.age),
-      });
-      setFlashMessage({
-        text: "User created successfully.",
-        type: "success",
       });
       navigate("/");
     } catch (error) {

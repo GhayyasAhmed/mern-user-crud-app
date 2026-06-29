@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, fetchUsers as fetchUsersFromApi, getErrorMessage } from "./api";
-import { getFlashMessage } from "./notifications";
 import type { UserType } from "./types";
 
 function Users() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState(() => {
-    const flashMessage = getFlashMessage();
-    return flashMessage?.type === "success" ? flashMessage.text : "";
-  });
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [pendingDeleteUser, setPendingDeleteUser] = useState<UserType | null>(null);
   const navigate = useNavigate();
@@ -41,12 +36,10 @@ function Users() {
     try {
       setDeletingUserId(pendingDeleteUser.id);
       setError("");
-      setSuccessMessage("");
       await api.delete(`/users/${pendingDeleteUser.id}`);
       setUsers((currentUsers) =>
         currentUsers.filter((user) => user.id !== pendingDeleteUser.id),
       );
-      setSuccessMessage("User deleted successfully.");
       setPendingDeleteUser(null);
     } catch (err) {
       setError(getErrorMessage(err, "Unable to delete the user."));
@@ -64,12 +57,6 @@ function Users() {
             Add User
           </Link>
         </div>
-
-        {successMessage ? (
-          <div className="alert alert-success" role="status" aria-live="polite">
-            {successMessage}
-          </div>
-        ) : null}
 
         {error ? (
           <div className="alert alert-danger" role="alert" aria-live="polite">

@@ -3,7 +3,6 @@ import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, fetchUserById, getErrorMessage } from "./api";
 import UserForm from "./components/UserForm";
-import { setFlashMessage } from "./notifications";
 import { getUserFormErrors } from "./validation";
 
 function UpdateUser() {
@@ -92,10 +91,6 @@ function UpdateUser() {
         name: values.name.trim(),
         email: values.email.trim(),
         age: Number(values.age),
-      });
-      setFlashMessage({
-        text: "User updated successfully.",
-        type: "success",
       });
       navigate("/");
     } catch (error) {
