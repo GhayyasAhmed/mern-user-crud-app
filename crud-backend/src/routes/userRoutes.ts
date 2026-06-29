@@ -6,13 +6,15 @@ import {
   getUsers,
   updateUser,
 } from "../controllers/userController";
+import { validateRequest } from "../middlewares/validateRequest";
+import { validateCreateUser, validateUpdateUser } from "../validators/userValidators";
 
 const router = Router();
 
 router.get("/", getUsers);
 router.get("/:id", getUserById);
-router.post("/", createUser);
-router.patch("/:id", updateUser);
+router.post("/", validateRequest(validateCreateUser), createUser);
+router.patch("/:id", validateRequest(validateUpdateUser), updateUser);
 router.delete("/:id", deleteUser);
 
 export default router;

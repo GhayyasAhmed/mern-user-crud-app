@@ -11,6 +11,23 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ) {
+  if (error instanceof mongoose.Error.ValidationError) {
+    return res.status(400).json({
+      message: "Validation failed",
+      errors: Object.values(error.errors).map((issue) => issue.message),
+      success: false,
+      status: 400,
+    });
+  }
+
+  if ("code" in error && error.code === 11000) {
+    return res.status(409).json({
+      message: "Email address already exists",
+      success: false,
+      status: 409,
+    });
+  }
+
   if (error instanceof mongoose.Error.CastError) {
     return res.status(400).json({
       message: "Invalid resource ID",
