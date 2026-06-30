@@ -24,7 +24,7 @@ Notes:
 
 - `VITE_API_URL` should point to the backend origin only, without `/api`
 - local example: `http://localhost:3001`
-- production example: `https://your-backend-service.onrender.com`
+- production example: `https://your-backend-service.vercel.app`
 
 The frontend builds API URLs like:
 
