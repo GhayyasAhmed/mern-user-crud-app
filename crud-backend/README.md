@@ -40,7 +40,7 @@ Notes:
 
 - `name` is required, trimmed, and must be between 2 and 50 characters
 - `email` is required, normalized to lowercase, must be valid, and must be unique
-- `age` is required and must be a whole number between 13 and 120
+- `age` is required and must be a whole number between 1 and 120
 
 ## Deployment notes
 
@@ -48,5 +48,5 @@ Notes:
 - Production start command: `npm start`
 - Set `MONGO_URI` to your MongoDB Atlas connection string when deploying
 - Set `FRONTEND_URLS` to the deployed frontend origin so CORS allows browser requests
-- On Vercel, route requests to `src/vercel.ts` instead of `src/server.ts`
+- On Vercel, route requests to `api/[...route].ts`
 - If Atlas still times out, make sure MongoDB Atlas Network Access allows Vercel traffic
