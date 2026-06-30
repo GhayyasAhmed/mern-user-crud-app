@@ -23,6 +23,10 @@ if (nodeEnv !== "development" && !mongoUri) {
   throw new Error("MONGO_URI is required outside development.");
 }
 
+console.log("nodeEnv", nodeEnv)
+console.log("mongoUri", mongoUri)
+console.log("frontend", process.env.FRONTEND_URLS)
+
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: readNumber(process.env.PORT, 3001),
