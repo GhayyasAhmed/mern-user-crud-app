@@ -2,19 +2,31 @@ import mongoose from "mongoose";
 import { env } from "./env";
 
 let cachedConnection: typeof mongoose | null = null;
+let connectionPromise: Promise<typeof mongoose> | null = null;
 
 export async function connectDatabase() {
   if (cachedConnection || mongoose.connection.readyState === 1) {
     return cachedConnection || mongoose;
   }
 
-  if (mongoose.connection.readyState === 2) {
-    return mongoose;
+  if (connectionPromise) {
+    cachedConnection = await connectionPromise;
+    return cachedConnection;
   }
 
-  cachedConnection = await mongoose.connect(env.mongoUri, {
-    serverSelectionTimeoutMS: 10000,
-  });
+  connectionPromise = mongoose
+    .connect(env.mongoUri, {
+      serverSelectionTimeoutMS: 10000,
+      dbName: "crud-backend",
+    })
+    .then((connection) => {
+      cachedConnection = connection;
+      return connection;
+    })
+    .finally(() => {
+      connectionPromise = null;
+    });
 
+  cachedConnection = await connectionPromise;
   return cachedConnection;
 }
