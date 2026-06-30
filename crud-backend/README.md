@@ -48,3 +48,5 @@ Notes:
 - Production start command: `npm start`
 - Set `MONGO_URI` to your MongoDB Atlas connection string when deploying
 - Set `FRONTEND_URLS` to the deployed frontend origin so CORS allows browser requests
+- On Vercel, route requests to `src/vercel.ts` instead of `src/server.ts`
+- If Atlas still times out, make sure MongoDB Atlas Network Access allows Vercel traffic

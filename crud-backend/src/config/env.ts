@@ -16,9 +16,16 @@ function readOrigins(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+const nodeEnv = process.env.NODE_ENV || "development";
+const mongoUri = process.env.MONGO_URI;
+
+if (nodeEnv !== "development" && !mongoUri) {
+  throw new Error("MONGO_URI is required outside development.");
+}
+
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: readNumber(process.env.PORT, 3001),
-  mongoUri: process.env.MONGO_URI || "mongodb://localhost:27017/crud-backend",
+  mongoUri: mongoUri || "mongodb://localhost:27017/crud-backend",
   allowedOrigins: readOrigins(process.env.FRONTEND_URLS),
 };
